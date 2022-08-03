@@ -13,6 +13,7 @@
 typedef uint16_t layout_key_t;
 typedef layout_key_t layout_t[128];
 
+static const layout_key_t hid_key_none   = 0;
 static const layout_key_t hid_mod_lctrl  = (1 <<  8);
 static const layout_key_t hid_mod_lshift = (1 <<  9);
 static const layout_key_t hid_mod_lalt   = (1 << 10);
@@ -21,8 +22,10 @@ static const layout_key_t hid_mod_rctrl  = (1 << 12);
 static const layout_key_t hid_mod_rshift = (1 << 13);
 static const layout_key_t hid_mod_ralt   = (1 << 14);
 static const layout_key_t hid_mod_rgui   = (1 << 15);
+static const layout_key_t hid_mod_all    = hid_mod_lctrl | hid_mod_lshift | hid_mod_lalt | hid_mod_lgui 
+                                         | hid_mod_rctrl | hid_mod_rshift | hid_mod_ralt | hid_mod_rgui;
 
-static const layout_key_t hid_codes[49] = {
+static const layout_key_t ordered_hid_codes[49] = {
     0x35,0x1e,0x1f,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x2d,0x2e,
     0x14,0x1a,0x08,0x15,0x17,0x1c,0x18,0x0c,0x12,0x13,0x2f,0x30,
     0x04,0x16,0x07,0x09,0x0a,0x0b,0x0d,0x0e,0x0f,0x33,0x34,0x31,
@@ -152,13 +155,18 @@ static void usage() {
            "        -w      write layout file <file> when done\n"
            "        -d      dump current keyboard layout\n"
            "        -m <char> <key> <mods>\n"
-           "                maps a key to a character. repeat option as necessary.\n"
+           "                map a key to a character. repeat option as necessary.\n"
            "                    <char> is any character between ascii(32) and ascii(126)\n"
            "                    <key>  is the hid key code (see -k)\n"
            "                    <mods> is any combination of none, lshift, lctrl, lalt,\n"
            "                           lgui, rshift, rctrl, ralt, rgui separated by a +\n"
-           "        -k      displays valid hid key codes\n" 
-           "        -l      lists the resulting mapping\n"
+           "        -k      display valid hid key codes\n" 
+           "        -g      display a simplified graphical representation of the\n"
+           "                resulting mapping. good for a quick check, prefer -l for\n"
+           "                serious diagnostic\n"
+           "        -l      list exhaustively the content of the resulting mapping\n"
+           "\n"
+           "    options are applied in the following order: -r -d -m -k -g -l -w\n"
     );
 }
 
@@ -178,10 +186,53 @@ static void show_keys() {
 }
 
 static void show_layout(const layout_t layout) {
-    printf("layout is:  (char : code : hid_key modifiers...)\n");
+    char map[49*2];
+    memset(map, ' ', sizeof(map));
+
+    for (size_t num = 32; num < 127; ++num) {
+        if (layout[num] != 0) {
+            size_t key;
+            for (key = 0; key < sizeof(ordered_hid_codes) / sizeof(*ordered_hid_codes); ++key) {
+                if (ordered_hid_codes[key] == (layout[num] & 0xff)) 
+                    break;
+            }
+            if (key < sizeof(ordered_hid_codes) / sizeof(*ordered_hid_codes)) {
+                if ((layout[num] & hid_mod_all) == 0) // no modifier
+                    map[key*2] = (char)num;
+                else if ((layout[num] & hid_mod_all) == hid_mod_lshift) // only lshift modifier
+                    map[key*2+1] = (char)num;
+            }
+        }
+    }
+
+    printf("layout quick overview (normal & lshift keys):\n"
+           "    ---------------------------------------------------------------------- \n"
+           "   | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c |  <- |\n"
+           "    ---------------------------------------------------------------------- \n"
+           "   |  -> | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c |    |\n"
+           "    ------------------------------------------------------------------|   |\n"
+           "   |   o  | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c |   |\n"
+           "    ---------------------------------------------------------------------- \n"
+           "   |  ^  | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c | %c%c |    ^    |\n"
+           "    ---------------------------------------------------------------------- \n"
+           "   | ctrl | gui | alt |              %c%c                | alt | gui | ctrl |\n"
+           "    ---------------------------------------------------------------------- \n",
+           map[0],  map[1],  map[2],  map[3],  map[4],  map[5],  map[6],  map[7],  map[8],  map[9],  map[10], map[11], map[12], 
+           map[13], map[14], map[15], map[16], map[17], map[18], map[19], map[20], map[21], map[22], map[23], map[24], map[25],
+           map[26], map[27], map[28], map[29], map[30], map[31], map[32], map[33], map[34], map[35], map[36], map[37], 
+           map[38], map[39], map[40], map[41], map[42], map[43], map[44], map[45], map[46], map[47], map[48], map[49], 
+           map[50], map[51], map[52], map[53], map[54], map[55], map[56], map[57], map[58], map[59], map[60], map[61], 
+           map[62], map[63], map[64], map[65], map[66], map[67], map[68], map[69], map[70], map[71], map[72], map[73], 
+           map[74], map[75], map[76], map[77], map[78], map[79], map[80], map[81], map[82], map[83], map[84], map[85], 
+           map[86], map[87], map[88], map[89], map[90], map[91], map[92], map[93], map[94], map[95], map[96], map[97]);
+}
+
+static void list_layout(const layout_t layout) {
+    printf("layout is: \n"
+           "   chr : code : key modifiers...\n");
     for (size_t num = 32; num < 127; ++num) {
         layout_key_t code = layout[num];
-        printf("   %c: %04x : %02x %s %s %s %s %s %s %s %s\n", (char)num, code, code & 0xff, 
+        printf("   %c   : %04x : %02x  %s %s %s %s %s %s %s %s\n", (char)num, code, code & 0xff, 
                code & hid_mod_lctrl  ? "lctrl"  : "     ", 
                code & hid_mod_lshift ? "lshift" : "      ", 
                code & hid_mod_lalt   ? "lalt"   : "    ", 
@@ -200,6 +251,7 @@ int main(int argc, char *argv[]) {
     bool write = false;
     bool dump = false;
     bool keys = false;
+    bool show = false;
     bool list = false;
     bool file = false;
     char *path = NULL;
@@ -234,6 +286,9 @@ int main(int argc, char *argv[]) {
             } else if (strcmp("-k", argv[argn]) == 0) {
                 keys = true;
                 argn++;
+            } else if (strcmp("-g", argv[argn]) == 0) {
+                show = true;
+                argn++;
             } else if (strcmp("-l", argv[argn]) == 0) {
                 list = true;
                 argn++;
@@ -264,11 +319,11 @@ int main(int argc, char *argv[]) {
                     result = -1;
                 }
                 size_t check;
-                for (check = 0; check < sizeof(hid_codes)/sizeof(*hid_codes); ++check) {
-                    if (hid_codes[check] == code)
+                for (check = 0; check < sizeof(ordered_hid_codes)/sizeof(*ordered_hid_codes); ++check) {
+                    if (ordered_hid_codes[check] == code)
                         break;
                 }
-                if (check >= sizeof(hid_codes)/sizeof(*hid_codes)) {
+                if (check >= sizeof(ordered_hid_codes)/sizeof(*ordered_hid_codes)) {
                     log_error("modify: hid key code out of range\n");
                     result = -1;
                 }
@@ -368,8 +423,10 @@ int main(int argc, char *argv[]) {
     }
     if (keys)
         show_keys();
-    if (list)
+    if (show)
         show_layout(layout);
+    if (list)
+        list_layout(layout);
     if (write) {
         printf("writing layout file %s...\n", path);
         if (!write_layout(path, layout))
