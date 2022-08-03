@@ -50,3 +50,8 @@ Obviously requires a Windows computer.
 - The second argument to the -m option (1e and 27 in the example above) is the key code. See what code correspond to each key:
 
         flipperzero_badusb_kl.exe -k
+
+- Just display a simplified view of the current keyboard layout, without saving anything:
+
+        flipperzero_badusb_kl.exe -d -g
+
