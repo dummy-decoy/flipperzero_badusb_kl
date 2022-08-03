@@ -104,21 +104,35 @@ static bool patch_layout(layout_t layout, const char chr, const layout_key_t hid
 
 static layout_key_t char_to_virtual_scan_code(const char chr) {
     SHORT virtual_key = VkKeyScan(chr);
+    if (virtual_key == -1) {
+        log_warning("no virtual key found for char %c\n", chr);
+        return hid_key_none;
+    }
     SHORT modifiers = (virtual_key & 0xff00);
     UINT  scan_code = MapVirtualKey((virtual_key & 0xff), MAPVK_VK_TO_VSC);
+    if (scan_code == 0) {
+        log_warning("no virtual scan code found for char %c\n", chr);
+        return hid_key_none;
+    }
     return (layout_key_t)(scan_code|modifiers);
 }
 
 static layout_key_t virtual_scan_code_to_hid_code(const layout_key_t vscm) {
+    if (vscm == hid_key_none)
+        return hid_key_none;
+    
     layout_key_t vsc = (vscm & 0xff); // strip modifiers
     size_t index;
     for (index = 0; index < sizeof(vsc_to_hid)/sizeof(*vsc_to_hid); ++index) {
         if (vsc_to_hid[index][0] == vsc)
             break;
     }
-    if (index < sizeof(vsc_to_hid)/sizeof(*vsc_to_hid))
+    if (index < sizeof(vsc_to_hid)/sizeof(*vsc_to_hid)) {
         return vsc_to_hid[index][1];
-    return 0;
+    } else {
+        log_warning("virtual scan code has no hid mapping: %04x\n", vscm);
+        return hid_key_none;
+    }
 }
 
 static layout_key_t virtual_scan_code_to_hid_modifiers(const layout_key_t vscm) {
