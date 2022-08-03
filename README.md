@@ -10,13 +10,18 @@
         -w      write layout file <file> when done
         -d      dump current keyboard layout
         -m <char> <key> <mods>
-                maps a key to a character. repeat option as necessary.
+                map a key to a character. repeat option as necessary.
                     <char> is any character between ascii(32) and ascii(126)
                     <key>  is the hid key code (see -k)
                     <mods> is any combination of none, lshift, lctrl, lalt,
                            lgui, rshift, rctrl, ralt, rgui separated by a +
-        -k      displays valid hid key codes
-        -l      lists the resulting mapping
+        -k      display valid hid key codes\
+        -g      display a simplified graphical representation of the
+                resulting mapping. good for a quick check, prefer -l for
+                serious diagnostic
+        -l      list exhaustively the content of the resulting mapping
+
+    options are applied in the following order: -r -d -m -k -g -l -w
 
 ## Requirements
 
