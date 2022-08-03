@@ -14,9 +14,9 @@
                     <char> is any character between ascii(32) and ascii(126)
                     <key>  is the hid key code (see -k)
                     <mods> is any combination of none, lshift, lctrl, lalt,
-                            rshift, rctrl, ralt separated by a +
+                           lgui, rshift, rctrl, ralt, rgui separated by a +
         -k      displays valid hid key codes
-        -s      shows the resulting mapping
+        -l      lists the resulting mapping
 
 ## Requirements
 
