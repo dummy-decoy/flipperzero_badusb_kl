@@ -32,3 +32,21 @@ The included makefile is intended for the MingW-W64 port of GCC on Windows.
 ### Execution
 
 Obviously requires a Windows computer.
+
+## Examples
+
+- Create a new layout file from your own current keybaord layout:
+
+        flipperzero_badusb_kl.exe -d -w my_layout.kl
+
+- Open an existing layout file and display its simplified view:
+
+        flipperzero_badusb_kl.exe -r -g my_layout.kl
+
+- Open an existing layout, set the key for $ to ctrl+shift+1, set the key for # to altgr+0, and save the modified layout:
+
+        flipperzero_badusb_kl.exe -r -m $ 1e ctrl+shift -m # 27 ralt -w my_layout.kl
+
+- The second argument to the -m option (1e and 27 in the example above) is the key code. See what code correspond to each key:
+
+        flipperzero_badusb_kl.exe -k
