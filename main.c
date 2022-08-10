@@ -179,6 +179,9 @@ static void usage() {
            "                resulting mapping. good for a quick check, prefer -l for\n"
            "                serious diagnostic\n"
            "        -l      list exhaustively the content of the resulting mapping\n"
+           "        -e      expert mode. suppress all checks on following -m options,\n"
+           "                effectively allowing to put whatever you see fit into the\n"
+           "                keyboard layout. "
            "\n"
            "    options are applied in the following order: -r -d -m -k -g -l -w\n"
     );
@@ -267,6 +270,7 @@ int main(int argc, char *argv[]) {
     bool keys = false;
     bool show = false;
     bool list = false;
+    bool expert = false;
     bool file = false;
     char *path = NULL;
     size_t modify_size = 0;
@@ -314,7 +318,10 @@ int main(int argc, char *argv[]) {
                     break;
                 }
 
-                if ((strlen(argv[argn]) != 1) || ((int)argv[argn][0] < 32) || ((int)argv[argn][0] >= 127)) {
+                if (   (strlen(argv[argn]) != 1) 
+                    || (!expert && ((int)argv[argn][0] < 32)) 
+                    || (!expert && ((int)argv[argn][0] >= 127)) 
+                    || (expert && ((int)argv[argn][0] >= 128))) {
                     log_error("modify: invalid character specified\n");
                     result = -1;
                 }
@@ -327,7 +334,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 char *end;
-                layout_key_t code = strtol(argv[argn], &end, 16);
+                layout_key_t code = strtol(argv[argn], &end, 16) & 0xffff;  // limit code to 16 bits              
                 if (((end-argv[argn]) != strlen(argv[argn])) || (code == 0)) {
                     log_error("modify: invalid hid key code specified\n");
                     result = -1;
@@ -337,7 +344,7 @@ int main(int argc, char *argv[]) {
                     if (ordered_hid_codes[check] == code)
                         break;
                 }
-                if (check >= sizeof(ordered_hid_codes)/sizeof(*ordered_hid_codes)) {
+                if (!expert && (check >= sizeof(ordered_hid_codes)/sizeof(*ordered_hid_codes))) {
                     log_error("modify: hid key code out of range\n");
                     result = -1;
                 }
@@ -396,6 +403,9 @@ int main(int argc, char *argv[]) {
                 modify = realloc(modify, sizeof(*modify) * (modify_size+1));
                 modify[modify_size-1].chr = chr;
                 modify[modify_size-1].code = code;
+                argn++;
+            } else if (strcmp("-e", argv[argn]) == 0) {
+                expert = true;
                 argn++;
             } else if (!file) {
                 path = argv[argn];
