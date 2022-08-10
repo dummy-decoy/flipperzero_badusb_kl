@@ -20,6 +20,9 @@
                 resulting mapping. good for a quick check, prefer -l for
                 serious diagnostic
         -l      list exhaustively the content of the resulting mapping
+        -e      expert mode. suppress all checks on following -m options,
+                effectively allowing to put whatever you see fit into the
+                keyboard layout. 
 
     options are applied in the following order: -r -d -m -k -g -l -w
 
