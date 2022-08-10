@@ -181,7 +181,7 @@ static void usage() {
            "        -l      list exhaustively the content of the resulting mapping\n"
            "        -e      expert mode. suppress all checks on following -m options,\n"
            "                effectively allowing to put whatever you see fit into the\n"
-           "                keyboard layout. "
+           "                keyboard layout. \n"
            "\n"
            "    options are applied in the following order: -r -d -m -k -g -l -w\n"
     );
