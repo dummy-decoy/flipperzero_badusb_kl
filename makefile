@@ -1,4 +1,10 @@
-flipperzero_badusb_kl.exe: main.c
-	gcc main.c -o flipperzero_badusb_kl.exe
+ifeq ($(OS),Windows_NT) 
+outfile=flipperzero_badusb_kl.exe
+else
+outfile=flipperzero_badusb_kl
+endif
 
-all: flipperzero_badusb_kl.exe
+${outfile}: main.c
+	gcc main.c -o ${outfile}
+
+all: ${outfile}
