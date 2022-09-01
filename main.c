@@ -1,8 +1,13 @@
+#include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+
+#if WIN32
 #include <windows.h>
+#endif
 
 
 #define log(stream, ...) fprintf(stream, __VA_ARGS__)
@@ -102,6 +107,7 @@ static bool patch_layout(layout_t layout, const char chr, const layout_key_t hid
     return true;
 }
 
+#if WIN32
 static layout_key_t char_to_virtual_scan_code(const char chr) {
     SHORT virtual_key = VkKeyScan(chr);
     if (virtual_key == -1) {
@@ -158,6 +164,7 @@ static layout_key_t char_to_hid_code(const char chr) {
     layout_key_t vscm = char_to_virtual_scan_code(chr);
     return make_hid_code(virtual_scan_code_to_hid_code(vscm), virtual_scan_code_to_hid_modifiers(vscm));
 }
+#endif
 
 static void usage() {
     printf("usage: \n"
@@ -167,7 +174,9 @@ static void usage() {
            "        -h      display this help\n"
            "        -r      read layout file <file> and work from here\n"
            "        -w      write layout file <file> when done\n"
+#if WIN32
            "        -d      dump current keyboard layout\n"
+#endif
            "        -m <char> <key> <mods>\n"
            "                map a key to a character. repeat option as necessary.\n"
            "                    <char> is any character between ascii(32) and ascii(126)\n"
@@ -298,9 +307,11 @@ int main(int argc, char *argv[]) {
             } else if (strcmp("-w", argv[argn]) == 0) {
                 write = true;
                 argn++;
+#if WIN32                
             } else if (strcmp("-d", argv[argn]) == 0) {
                 dump = true;
                 argn++;
+#endif                
             } else if (strcmp("-k", argv[argn]) == 0) {
                 keys = true;
                 argn++;
@@ -433,12 +444,14 @@ int main(int argc, char *argv[]) {
         if (!read_layout(path, layout))
             return -1;
     }
+#if WIN32
     if (dump) {
         printf("dumping current keyboard layout...\n");
         for (uint8_t num = 32; num < 127; ++num) {
             layout[num] = char_to_hid_code((char)num);
         }
     }
+#endif
     for (size_t index = 0; index < modify_size; ++index) {
         char chr = modify[index].chr;
         layout_key_t code = modify[index].code;
