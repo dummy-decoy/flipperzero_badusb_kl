@@ -38,7 +38,7 @@ Obviously requires a Windows computer.
 
 ## Examples
 
-- Create a new layout file from your own current keybaord layout:
+- Create a new layout file from your own current keyboard layout:
 
         flipperzero_badusb_kl.exe -d -w my_layout.kl
 
@@ -60,7 +60,7 @@ Obviously requires a Windows computer.
 
 ## .kl file format
 
-A .kl file is a binary file format which stores, for each ascii code point in order from *ASCII(0)* to *ASCII(127)*, a 16 bit little endian value composed of a *USB HID code* in the low order byte and a *bit set of modifier keys* in the high order byte. 
+A .kl file is a binary file format which stores, for each ASCII code point in order from *ASCII(0)* to *ASCII(127)*, a 16 bit little endian value composed of a *USB HID code* in the low order byte and a *bit set of modifier keys* in the high order byte. 
 
 *USB HID codes* for each key of a standard 102/105 key keyboard are (as displayed passing option `-k` to the software):
 
@@ -77,4 +77,4 @@ A .kl file is a binary file format which stores, for each ascii code point in or
         | ctrl | gui | alt |              2c                | alt | gui | ctrl |
          ---------------------------------------------------------------------- 
 
-*Modifier key bits* are, in order starting from bit 1: *lctrl*, *lshift*, *lalt*, *lgui*, *rctrl*, *rshift*, *ralt*, *rgui*. 
+*Modifier key bits* are listed in order, starting from bit 1: *lctrl*, *lshift*, *lalt*, *lgui*, *rctrl*, *rshift*, *ralt*, *rgui*. 
